@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ book.title }} — Электронная библиотека{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-3">
+        {% if book.cover %}
+        <img src="{{ url_for('static', filename='covers/' + book.cover.filename) }}"
+             class="img-fluid rounded shadow" alt="Обложка {{ book.title }}">
+        {% else %}
+        <div class="bg-secondary rounded d-flex align-items-center justify-content-center"
+             style="height:300px;">
+            <i class="bi bi-book text-white" style="font-size:4rem;"></i>
+        </div>
+        {% endif %}
+    </div>
+    <div class="col-md-9">
+        <div class="d-flex justify-content-between align-items-start">
+            <h1 class="h2">{{ book.title }}</h1>
+            <div class="d-flex gap-2 flex-wrap">
+                {% if current_user.is_authenticated %}
+                <button class="btn btn-outline-success btn-sm"
+                        data-bs-toggle="modal" data-bs-target="#addToCollectionModal">
+                    <i class="bi bi-bookmark-plus"></i> В подборку
+                </button>
+                {% endif %}
+                {% if current_user.is_authenticated and (current_user.is_admin or current_user.is_moderator) %}
+                <a href="{{ url_for('books.edit', book_id=book.id) }}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-pencil"></i> Редактировать
+                </a>
+                {% endif %}
+                {% if current_user.is_authenticated and current_user.is_admin %}
+                <button class="btn btn-outline-danger btn-sm"
+                        data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    <i class="bi bi-trash"></i> Удалить
+                </button>
+                {% endif %}
+            </div>
+        </div>
+
+        <table class="table table-borderless mt-3">
+            <tr><th width="150">Автор</th><td>{{ book.author }}</td></tr>
+            <tr><th>Год издания</th><td>{{ book.year }}</td></tr>
+            <tr><th>Издательство</th><td>{{ book.publisher }}</td></tr>
+            <tr><th>Объём</th><td>{{ book.pages }} стр.</td></tr>
+            <tr>
+                <th>Жанры</th>
+                <td>
+                    {% for genre in book.genres %}
+                    <span class="badge bg-secondary">{{ genre.name }}</span>
+                    {% endfor %}
+                </td>
+            </tr>
+            <tr>
+                <th>Средняя оценка</th>
+                <td>
+                    {% if book.avg_rating is not none %}
+                    <span class="text-warning"><i class="bi bi-star-fill"></i></span>
+                    {{ book.avg_rating }} / 5
+                    <span class="text-muted small">({{ book.reviews_count }} рецензий)</span>
+                    {% else %}
+                    <span class="text-muted">Нет оценок</span>
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div class="mb-5">
+    <h4>Описание</h4>
+    <div class="card card-body bg-light">
+        {{ desc_html | safe }}
+    </div>
+</div>
+
+<hr>
+<h4 class="mb-3">Рецензии</h4>
+
+{% if book.reviews %}
+    {% for review in book.reviews %}
+    <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between">
+            <strong>{{ review.user.full_name }}</strong>
+            <span>
+                {% for i in range(review.rating) %}<i class="bi bi-star-fill text-warning"></i>{% endfor %}
+                {% for i in range(5 - review.rating) %}<i class="bi bi-star text-muted"></i>{% endfor %}
+                <span class="ms-1 text-muted small">{{ review.created_at.strftime('%d.%m.%Y') }}</span>
+            </span>
+        </div>
+        <div class="card-body">
+            {{ review.text | safe }}
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+<p class="text-muted">Пока нет рецензий.</p>
+{% endif %}
+
+{% if current_user.is_authenticated %}
+    {% if user_review %}
+    <div class="alert alert-info mt-3">
+        <strong>Ваша рецензия уже добавлена.</strong>
+    </div>
+    {% else %}
+    <a href="{{ url_for('reviews.new', book_id=book.id) }}" class="btn btn-primary mt-3">
+        <i class="bi bi-pencil-square"></i> Написать рецензию
+    </a>
+    {% endif %}
+{% endif %}
+
+{# Модалка добавления в подборку #}
+{% if current_user.is_authenticated %}
+<div class="modal fade" id="addToCollectionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Добавить в подборку</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('collections.add_book') }}" method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="book_id" value="{{ book.id }}">
+                    <div class="mb-3">
+                        <label for="collection_id" class="form-label">Выберите подборку</label>
+                        <select class="form-select" id="collection_id" name="collection_id" required>
+                            <option value="" disabled selected>Загрузка...</option>
+                        </select>
+                    </div>
+                    <div id="noCollections" class="alert alert-warning d-none">
+                        У вас ещё нет подборок.
+                        <a href="{{ url_for('collections.index') }}">Создать подборку</a>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-primary" id="addToCollectionBtn">Добавить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{# Модалка удаления #}
+{% if current_user.is_authenticated and current_user.is_admin %}
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Удаление книги</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Вы уверены, что хотите удалить книгу <strong>{{ book.title }}</strong>?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Нет</button>
+                <form action="{{ url_for('books.delete', book_id=book.id) }}" method="POST">
+                    <button type="submit" class="btn btn-danger">Да</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Загружаем подборки пользователя при открытии модалки
+document.getElementById('addToCollectionModal')?.addEventListener('show.bs.modal', function() {
+    fetch('{{ url_for("collections.user_collections_json") }}')
+        .then(r => r.json())
+        .then(data => {
+            const select = document.getElementById('collection_id');
+            const noCollections = document.getElementById('noCollections');
+            const btn = document.getElementById('addToCollectionBtn');
+            select.innerHTML = '';
+            if (data.length === 0) {
+                noCollections.classList.remove('d-none');
+                select.classList.add('d-none');
+                btn.disabled = true;
+            } else {
+                noCollections.classList.add('d-none');
+                select.classList.remove('d-none');
+                btn.disabled = false;
+                data.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c.id;
+                    opt.textContent = c.name;
+                    select.appendChild(opt);
+                });
+            }
+        });
+});
+</script>
+{% endblock %}

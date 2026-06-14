@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Написать рецензию — {{ book.title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <h2 class="mb-1">Написать рецензию</h2>
+        <p class="text-muted mb-4">Книга: <strong>{{ book.title }}</strong></p>
+
+        <form method="POST" id="reviewForm">
+            <div class="mb-3">
+                <label for="rating" class="form-label">Оценка</label>
+                <select class="form-select" id="rating" name="rating" required>
+                    {% for value, label in rating_labels.items()|sort(reverse=True) %}
+                    <option value="{{ value }}" {% if value == 5 %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="text" class="form-label">Текст рецензии <small class="text-muted">(Markdown)</small></label>
+                <textarea class="form-control" id="text" name="text" rows="6"></textarea>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+                <a href="{{ url_for('books.show', book_id=book.id) }}" class="btn btn-secondary">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const easyMDE = new EasyMDE({ element: document.getElementById('text'), spellChecker: false });
+
+    document.getElementById('reviewForm').addEventListener('submit', function(e) {
+        const text = easyMDE.value().trim();
+        if (!text) {
+            e.preventDefault();
+            alert('Заполните текст рецензии');
+        }
+    });
+</script>
+{% endblock %}

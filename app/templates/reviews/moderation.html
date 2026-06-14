@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Модерация рецензий{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Модерация рецензий</h2>
+
+{% if pagination.items %}
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Книга</th>
+                <th>Пользователь</th>
+                <th>Дата добавления</th>
+                <th>Действие</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for review in pagination.items %}
+            <tr>
+                <td>{{ (pagination.page - 1) * 10 + loop.index }}</td>
+                <td>
+                    <a href="{{ url_for('books.show', book_id=review.book.id) }}">
+                        {{ review.book.title }}
+                    </a>
+                </td>
+                <td>{{ review.user.full_name }}</td>
+                <td>{{ review.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                <td>
+                    <a href="{{ url_for('reviews.moderation_show', review_id=review.id) }}"
+                       class="btn btn-sm btn-primary">
+                        <i class="bi bi-eye"></i> Рассмотреть
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{# Пагинация #}
+{% if pagination.pages > 1 %}
+<nav>
+    <ul class="pagination justify-content-center">
+        <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('reviews.moderation', page=pagination.prev_num) }}">«</a>
+        </li>
+        {% for p in pagination.iter_pages() %}
+            {% if p %}
+            <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('reviews.moderation', page=p) }}">{{ p }}</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">…</span></li>
+            {% endif %}
+        {% endfor %}
+        <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('reviews.moderation', page=pagination.next_num) }}">»</a>
+        </li>
+    </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<div class="alert alert-success">
+    <i class="bi bi-check-circle"></i> Нет рецензий на рассмотрении.
+</div>
+{% endif %}
+{% endblock %}

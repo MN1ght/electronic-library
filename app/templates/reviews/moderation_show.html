@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Рассмотрение рецензии{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Рассмотрение рецензии</h2>
+            <a href="{{ url_for('reviews.moderation') }}" class="btn btn-outline-secondary btn-sm">
+                ← Назад к списку
+            </a>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <strong>{{ review.user.full_name }}</strong>
+                        <span class="text-muted ms-2">→</span>
+                        <a href="{{ url_for('books.show', book_id=review.book.id) }}" class="ms-2">
+                            {{ review.book.title }}
+                        </a>
+                    </div>
+                    <div>
+                        {% for i in range(review.rating) %}<i class="bi bi-star-fill text-warning"></i>{% endfor %}
+                        {% for i in range(5 - review.rating) %}<i class="bi bi-star text-muted"></i>{% endfor %}
+                        <span class="ms-1">{{ rating_labels.get(review.rating, '') }}</span>
+                    </div>
+                </div>
+                <div class="text-muted small mt-1">
+                    Добавлена: {{ review.created_at.strftime('%d.%m.%Y %H:%M') }}
+                </div>
+            </div>
+            <div class="card-body">
+                {{ text_html | safe }}
+            </div>
+        </div>
+
+        <div class="d-flex gap-3">
+            <form action="{{ url_for('reviews.approve', review_id=review.id) }}" method="POST">
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-check-lg"></i> Одобрить
+                </button>
+            </form>
+            <form action="{{ url_for('reviews.reject', review_id=review.id) }}" method="POST">
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-x-lg"></i> Отклонить
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

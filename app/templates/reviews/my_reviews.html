@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}Мои рецензии{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Мои рецензии</h2>
+
+{% if reviews %}
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Книга</th>
+                <th>Оценка</th>
+                <th>Дата</th>
+                <th>Текст</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for review in reviews %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>
+                    <a href="{{ url_for('books.show', book_id=review.book.id) }}">
+                        {{ review.book.title }}
+                    </a>
+                </td>
+                <td>
+                    {% for i in range(review.rating) %}<i class="bi bi-star-fill text-warning"></i>{% endfor %}
+                    {% for i in range(5 - review.rating) %}<i class="bi bi-star text-muted"></i>{% endfor %}
+                    <span class="ms-1 small">{{ rating_labels.get(review.rating, '') }}</span>
+                </td>
+                <td>{{ review.created_at.strftime('%d.%m.%Y') }}</td>
+                <td>
+                    <div style="max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                        {{ review.text | striptags }}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p class="text-muted">Вы ещё не написали ни одной рецензии.</p>
+{% endif %}
+{% endblock %}

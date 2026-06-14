@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% from 'books/macros.html' import book_form %}
+
+{% block title %}
+    {{ 'Редактировать книгу' if is_edit else 'Добавить книгу' }} — Электронная библиотека
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <h2 class="mb-4">{{ 'Редактирование книги' if is_edit else 'Добавление книги' }}</h2>
+
+        <form method="POST"
+              {% if not is_edit %}enctype="multipart/form-data"{% endif %}>
+            {{ book_form(genres, form_data, book=book, is_edit=is_edit) }}
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Сохранить
+                </button>
+                <a href="{{ url_for('books.index') }}" class="btn btn-secondary">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const easyMDE = new EasyMDE({
+        element: document.getElementById('description'),
+        spellChecker: false,
+        placeholder: 'Введите описание книги в формате Markdown...',
+    });
+</script>
+{% endblock %}

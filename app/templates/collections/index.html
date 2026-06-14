@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Мои подборки{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Мои подборки</h2>
+    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addCollectionModal">
+        <i class="bi bi-plus-lg"></i> Добавить подборку
+    </button>
+</div>
+
+{% if collections %}
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Название</th>
+                <th>Книг</th>
+                <th>Действие</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for col in collections %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ col.name }}</td>
+                <td>{{ col.books_count }}</td>
+                <td>
+                    <a href="{{ url_for('collections.show', collection_id=col.id) }}"
+                       class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-eye"></i> Просмотр
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-info">
+    У вас ещё нет подборок. Создайте первую!
+</div>
+{% endif %}
+
+{# Модалка создания подборки #}
+<div class="modal fade" id="addCollectionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Новая подборка</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('collections.add') }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Название подборки</label>
+                        <input type="text" class="form-control" id="name" name="name"
+                               placeholder="Например: Любимые книги" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-success">Добавить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

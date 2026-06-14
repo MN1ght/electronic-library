@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ collection.name }} — Мои подборки{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <a href="{{ url_for('collections.index') }}" class="text-muted text-decoration-none">
+            ← Мои подборки
+        </a>
+        <h2 class="mt-1">{{ collection.name }}</h2>
+    </div>
+</div>
+
+{% if collection.books %}
+<div class="row row-cols-1 row-cols-md-2 g-3">
+    {% for book in collection.books %}
+    <div class="col">
+        <div class="card h-100 shadow-sm">
+            <div class="row g-0">
+                <div class="col-3">
+                    {% if book.cover %}
+                    <img src="{{ url_for('static', filename='covers/' + book.cover.filename) }}"
+                         class="img-fluid rounded-start h-100" style="object-fit:cover;" alt="Обложка">
+                    {% else %}
+                    <div class="bg-secondary h-100 rounded-start d-flex align-items-center justify-content-center">
+                        <i class="bi bi-book text-white" style="font-size:2rem;"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="col-9">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ book.title }}</h5>
+                        <p class="card-text text-muted small">{{ book.author }}, {{ book.year }}</p>
+                        <p class="card-text small">
+                            {% for genre in book.genres %}
+                            <span class="badge bg-secondary">{{ genre.name }}</span>
+                            {% endfor %}
+                        </p>
+                        <a href="{{ url_for('books.show', book_id=book.id) }}"
+                           class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-eye"></i> Открыть
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info">
+    В этой подборке пока нет книг. Добавьте книги со страниц их просмотра.
+</div>
+{% endif %}
+{% endblock %}

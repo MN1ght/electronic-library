@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Регистрация — Электронная библиотека{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h2 class="card-title mb-4 text-center">Регистрация</h2>
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="last_name" class="form-label">Фамилия *</label>
+                            <input type="text" class="form-control" id="last_name" name="last_name"
+                                   value="{{ form.get('last_name', '') }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="first_name" class="form-label">Имя *</label>
+                            <input type="text" class="form-control" id="first_name" name="first_name"
+                                   value="{{ form.get('first_name', '') }}" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="middle_name" class="form-label">Отчество <span class="text-muted">(необязательно)</span></label>
+                        <input type="text" class="form-control" id="middle_name" name="middle_name"
+                               value="{{ form.get('middle_name', '') }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="login" class="form-label">Логин *</label>
+                        <input type="text" class="form-control" id="login" name="login"
+                               value="{{ form.get('login', '') }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Пароль * <span class="text-muted small">(минимум 6 символов)</span></label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="password2" class="form-label">Повторите пароль *</label>
+                        <input type="password" class="form-control" id="password2" name="password2" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Зарегистрироваться</button>
+                    <div class="text-center mt-3">
+                        <span class="text-muted">Уже есть аккаунт?</span>
+                        <a href="{{ url_for('auth.login') }}">Войти</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
